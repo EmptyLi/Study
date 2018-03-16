@@ -1,264 +1,639 @@
-``` python
-df = pd.DataFrame({'AAA' : [4,5,6,7], 'BBB' : [10,20,30,40],'CCC' : [100,50,-30,-50]})
+### CHAPTER FIVE 10 MINUTES TO PANDAS
+```python
+In [1]: import pandas as pd
 
-# An if-then on one column
-# 如果满足 df.AAA > 5 的行，设置 BBB 列为 -1
-df.loc[df.AAA > 5, 'BBB'] = -1
+In [2]: import numpy as np
 
-# An if-then with assignment to 2 columns
-df.loc[df.AAA >= 5, ['BBB', 'CCC']] = 555
+In [3]: import matplotlib.pyplot as plt
+```
+#### 5.1 Object Creation
+> Creating a Series by passing a list of values, letting pandas create a default integer index:
+> 传入一个list对象，创建一个具有默认索引的 Series 对象
+```python
+ In [4]: s = pd.Series([1,3,5,np.nan,6,8])
+```
+> Creating a DataFrame by passing a numpy array, with a datetime index and labeled columns
+> 传入一个 numpy array 对象创建一个以时间为索引的 DataFrame 对象
+```sql
+In [7]: dates = pd.date_range('20130101', periods=6)
 
-# Add another line with different logic, to do the -else
-df.loc[df.AAA < 5,['BBB','CCC']] = 2000
+In [9]: df = pd.DataFrame(np.random.randn(6,4), index=dates, columns=list('ABCD'))
+```
 
-# Or use pandas where after you’ve set up a mask
-df_mask = pd.DataFrame({'AAA': [True] * 4, 'BBB': [False] * 4, 'CCC': [True, False] * 2})
-df.where(df_mask, -1000)
+> Creating a DataFrame by passing a dict of objects that can be converted to series-like.
+> 传入一个字典对象转换成一个 DataFrame 对象
+```python
+In [11]: pd.Timestamp('20130102')
+Out[11]: Timestamp('2013-01-02 00:00:00')
 
-# if-then-else using numpy’s where()
-df['logic'] = df.where(df['AAA'] >= 5, 'high', 'low')
+In [12]: pd.Series(1,index=list(range(4)),dtype='float32')
+Out[12]:
+0    1.0
+1    1.0
+2    1.0
+3    1.0
+dtype: float32
 
-# Split a frame with a boolean criterion
-dflow = df[df.AAA < 5]
-dhigh = df[df.AAA >= 5]
+In [13]: np.array([3] * 4,dtype='int32')
+Out[13]: array([3, 3, 3, 3])
 
-# Select with multi-column criteria
-df = pd.DataFrame({'AAA' : [4,5,6,7], 'BBB' : [10,20,30,40],'CCC' : [100,50,-30,-50]})
+In [14]: pd.Categorical(["test","train","test","train"])
+Out[14]:
+[test, train, test, train]
+Categories (2, object): [test, train]
 
-#
-newseries = df.loc[(df['BBB'] < 25) & (df['CCC'] >= -40), 'AAA']
-newseries = df.loc[(df['BBB'] > 25) | (df['CCC'] >= -40), 'AAA']
-df.loc[(df['BBB'] > 25) | (df['CCC'] >= 75), 'AAA'] = 0.1
+In [16]: df2 = pd.DataFrame({ 'A' : 1.,
+    ...: 'B' : pd.Timestamp('20130102'),
+    ...: 'C' : pd.Series(1,index=list(range(4)),dtype='float32'),
+    ...: 'D' : np.array([3] * 4,dtype='int32'),
+    ...: 'E' : pd.Categorical(["test","train","test","train"]),
+    ...: 'F' : 'foo' })
 
-# Select rows with data closest to certain value using argsort
-df = pd.DataFrame({'AAA' : [4,5,6,7], 'BBB' : [10,20,30,40],'CCC' : [100,50,-30,-50]})
-aValue = 43.0
-df.loc[(df['CCC'] - aValue).abs().argsort()]
+# 查看列的类型
+In [18]: df2.dtypes
+```
 
-# Dynamically reduce a list of criteria using a binary operators
-df = pd.DataFrame({'AAA' : [4,5,6,7], 'BBB' : [10,20,30,40],'CCC' : [100,50,-30,-50]})
-Crit1 = df.AAA <= 5.5
-Crit2 = df.BBB == 10.0
-Crit3 = df.CCC > -40.0
-AllCrit = Crit1 & Crit2 & Crit3
-df[AllCrit]
-#########################################################################################
-df[AllCrit]
-AllCrit = functools.reduce(lambda x,y: x & y, CritList)
+#### 5.2 Viewing Data
+> See the top & bottom rows of the frame
+```python
+In [19]: df.head()
 
-# Using both row labels and value conditionals
-df = pd.DataFrame({'AAA' : [4,5,6,7], 'BBB' : [10,20,30,40],'CCC' : [100,50,-30,-50]})
-df[(df.AAA <= 6) & (df.index.isin([0,2,4]))]
-
-# Use loc for label-oriented slicing and iloc positional slicing
-data = {'AAA' : [4,5,6,7], 'BBB' : [10,20,30,40],'CCC' : [100,50,-30,-50]}
-df = pd.DataFrame(data=data,index=['foo','bar','boo','kar'])
-
-# 1. Positional-oriented
-df.loc['bar':'kar']
-
-# 2. Label-oriented
-df.loc['bar':'kar']
-
-# 3. General
-df.iloc[0:3]
-
-# Ambiguity arises when an index consists of integers with a non-zero start or non-unit increment
-# Note index starts at 1
-df2 = pd.DataFrame(data=data,index=[1,2,3,4])
-
-# Position-oriented
-df2.iloc[1:3]
-
-# Label-oriented
-df2.loc[1:3]
-
-# Using inverse operator (~) to take the complement of a mask
-df = pd.DataFrame({'AAA' : [4,5,6,7], 'BBB' : [10,20,30,40], 'CCC' : [100,50,-30,-50]})
-df[~((df.AAA <= 6) & (df.index.isin([0,2,4])))]
-
-#############################################################################################
-# Extend a panel frame by transposing, adding a new dimension, and transposing back to the original dimensions
-df1, df2, df3 = pd.DataFrame(data, rng, cols), pd.DataFrame(data, rng, cols), pd.DataFrame(data, rng, cols)
-pf = pd.Panel({'df1':df1,'df2':df2,'df3':df3})
-
-# Efficiently and dynamically creating new columns using applymap
-df = pd.DataFrame({'AAA' : [1,2,1,3], 'BBB' : [1,1,2,2], 'CCC' : [2,1,3,1]})
-source_cols = df.columns # or some subset would work too
-new_cols = [str(x) + "_cat" for x in source_cols]
-categories = {1 : 'Alpha', 2 : 'Beta', 3 : 'Charlie' }
-df[new_cols] = df[source_cols].applymap(categories.get)
-
-############################################################################################
-# Keep other columns when using min() with groupby
-df = pd.DataFrame({'AAA' : [1,1,1,2,2,2,3,3], 'BBB' : [2,1,3,4,5,1,2,3]})
-
-# idxmin() to get the index of the mins
-df.loc[df.groupby('AAA')['BBB'].idxmin()]
-df.sort_values(by="BBB").groupby("AAA", as_index=False).first()
-
-############################################################################################
-
-
-# Creating a multi-index from a labeled frame
-df = pd.DataFrame({'row' : [0,1,2],'One_X' : [1.1,1.1,1.1],'One_Y' : [1.2,1.2,1.2],'Two_X' : [1.11,1.11,1.11],'Two_Y' : [1.22,1.22,1.22]})
-
-# As Labelled Index
-df = df.set_index('row')
-
-# With Hierarchical Columns
-df.columns = pd.MultiIndex.from_tuples([tuple(c.split('_')) for c in df.columns])
+In [20]: df.tail(3)
 
 ```
 
-### WORKING WITH TEXT DATA
-``` python
-# 设置一个pandas的Series对象
-s = pd.Series(['A', 'B', 'C', 'Aaba', 'Baca', np.nan, 'CABA', 'dog', 'cat'])
+> Display the index, columns, and the underlying numpy data
+```python
+In [21]: df.index
+Out[21]:
+DatetimeIndex(['2013-01-01', '2013-01-02', '2013-01-03', '2013-01-04',
+               '2013-01-05', '2013-01-06'],
+              dtype='datetime64[ns]', freq='D')
 
-# 通过 Series 对象的 str属性，操作 Series 对象中的每一个元素
+In [22]: df.columns
+Out[22]: Index(['A', 'B', 'C', 'D'], dtype='object')
 
-# 将每一个字符串类型的元素变成小写
-s.str.lower()
+In [23]: df.values
+```
+> Describe shows a quick statistic summary of your data
+```python
+In [25]: df.describe()
+Out[25]:
+              A         B         C         D
+count  6.000000  6.000000  6.000000  6.000000
+mean  -0.237564 -0.124112 -0.160527 -0.123289
+std    1.144114  1.173393  0.784553  0.999272
+min   -1.481931 -1.818939 -0.998916 -1.048233
+25%   -1.073905 -0.659305 -0.874365 -0.879429
+50%   -0.386529  0.011467 -0.106597 -0.505024
+75%    0.370741  0.185714  0.415818  0.739990
+max    1.509470  1.690432  0.789282  1.167780
+```
+> Transposing your data
+```python
+In [26]: df.T
+```
 
-# 将每一个字符串类型的元素变成大写
-s.str.upper()
+> Sorting by an axis
+```python
+In [29]: df.sort_index(axis=0, ascending=False)
+Out[29]:
+                   A         B         C         D
+2013-01-06 -0.982473 -1.818939  0.429424  1.056880
+2013-01-05  0.424516  0.229202  0.789282 -0.799369
+2013-01-04 -1.481931  0.055251 -0.998916  1.167780
+2013-01-03  0.209416 -0.868301 -0.588193 -1.048233
+2013-01-02 -1.104382 -0.032317  0.375000 -0.906115
+2013-01-01  1.509470  1.690432 -0.969755 -0.210679
 
-# 获取每一个字符串类型元素的长度
-s.str.len()
+In [30]: df.sort_index(axis=0, ascending=True)
+Out[30]:
+                   A         B         C         D
+2013-01-01  1.509470  1.690432 -0.969755 -0.210679
+2013-01-02 -1.104382 -0.032317  0.375000 -0.906115
+2013-01-03  0.209416 -0.868301 -0.588193 -1.048233
+2013-01-04 -1.481931  0.055251 -0.998916  1.167780
+2013-01-05  0.424516  0.229202  0.789282 -0.799369
+2013-01-06 -0.982473 -1.818939  0.429424  1.056880
 
-# 获取 pandas 的 Index 对象
-idx = pd.Index([' jack', 'jill ', ' jesse ', 'frank'])
+In [31]: df.sort_index(axis=1, ascending=False)
+Out[31]:
+                   D         C         B         A
+2013-01-01 -0.210679 -0.969755  1.690432  1.509470
+2013-01-02 -0.906115  0.375000 -0.032317 -1.104382
+2013-01-03 -1.048233 -0.588193 -0.868301  0.209416
+2013-01-04  1.167780 -0.998916  0.055251 -1.481931
+2013-01-05 -0.799369  0.789282  0.229202  0.424516
+2013-01-06  1.056880  0.429424 -1.818939 -0.982473
 
-# 将 pandas 的 Index 对象左右两侧的空格去掉
-idx.str.strip()
+In [32]: df.sort_index(axis=1, ascending=True)
+Out[32]:
+                   A         B         C         D
+2013-01-01  1.509470  1.690432 -0.969755 -0.210679
+2013-01-02 -1.104382 -0.032317  0.375000 -0.906115
+2013-01-03  0.209416 -0.868301 -0.588193 -1.048233
+2013-01-04 -1.481931  0.055251 -0.998916  1.167780
+2013-01-05  0.424516  0.229202  0.789282 -0.799369
+2013-01-06 -0.982473 -1.818939  0.429424  1.056880
+```
+> Sorting by values
+```python
+In [39]: df.sort_values(by='B', ascending=False)
+Out[39]:
+                   A         B         C         D
+2013-01-01  1.509470  1.690432 -0.969755 -0.210679
+2013-01-05  0.424516  0.229202  0.789282 -0.799369
+2013-01-04 -1.481931  0.055251 -0.998916  1.167780
+2013-01-02 -1.104382 -0.032317  0.375000 -0.906115
+2013-01-03  0.209416 -0.868301 -0.588193 -1.048233
+2013-01-06 -0.982473 -1.818939  0.429424  1.056880
 
-# 将 pandas 的 Index 对象左侧的空格去掉
-idx.str.lstrip()
+In [40]: df.sort_values(by='B', ascending=True)
+Out[40]:
+                   A         B         C         D
+2013-01-06 -0.982473 -1.818939  0.429424  1.056880
+2013-01-03  0.209416 -0.868301 -0.588193 -1.048233
+2013-01-02 -1.104382 -0.032317  0.375000 -0.906115
+2013-01-04 -1.481931  0.055251 -0.998916  1.167780
+2013-01-05  0.424516  0.229202  0.789282 -0.799369
+2013-01-01  1.509470  1.690432 -0.969755 -0.210679
+```
+### 5.3 Selection
+#### 5.3.1 Getting
+> Selecting a single column, which yields a Series, equivalent to df.A
+```python
+In [41]: df['A']
+```
+> Selecting via [], which slices the rows.
+```python
+In [42]: df[0:2]
+Out[42]:
+                   A         B         C         D
+2013-01-01  1.509470  1.690432 -0.969755 -0.210679
+2013-01-02 -1.104382 -0.032317  0.375000 -0.906115
 
-# 将 pandas 的 Index 对象右侧的空格去掉
-idx.str.rstrip()
+In [43]: df['20130102':'20130104']
+Out[43]:
+                   A         B         C         D
+2013-01-02 -1.104382 -0.032317  0.375000 -0.906115
+2013-01-03  0.209416 -0.868301 -0.588193 -1.048233
+2013-01-04 -1.481931  0.055251 -0.998916  1.167780
+```
 
-# 构建用于说明 df.coumns 也具有 str 属性的 DataFrame
-df = pd.DataFrame(randn(3, 2), columns=[' Column A ', ' Column B '], index=range(3))
+#### 5.3.2 Selection by Label
+> For getting a cross section using a label
+```python
+In [44]: df.loc[dates[0]]
 
-# 使用 df.columns 的 str 属性
-df.columns.str.strip()
+In [47]: df.loc['20130102':'20130104', ['A', 'B']]
+Out[47]:
+                   A         B
+2013-01-02 -1.104382 -0.032317
+2013-01-03  0.209416 -0.868301
+2013-01-04 -1.481931  0.055251
+```
+> For getting fast access to a scalar
+```python
+In [48]: df.loc[dates[0],'A']
+Out[48]: 1.5094702133612654
 
-# 综合案例
-df.columns.str.strip().str.lower().str.replace(' ', '_')
+In [49]: df.at[dates[0],'A']
+Out[49]: 1.5094702133612654
+```
+#### 5.3.3 Selection by Position
+> Select via the position of the passed integers
+```python
+In [50]: df.iloc[3]
+
+In [51]: df.iloc[1,1]
+Out[51]: -0.032317460144580382
+
+In [52]: df.iat[1,1]
+Out[52]: -0.032317460144580382
+```
+#### 5.3.4 Boolean Indexing
+> Using a single column’s values to select data
+```python
+In [53]: df[df.A > 0]
+Out[53]:
+                   A         B         C         D
+2013-01-01  1.509470  1.690432 -0.969755 -0.210679
+2013-01-03  0.209416 -0.868301 -0.588193 -1.048233
+2013-01-05  0.424516  0.229202  0.789282 -0.799369
+
+In [54]: df[df > 0]
+Out[54]:
+                   A         B         C        D
+2013-01-01  1.509470  1.690432       NaN      NaN
+2013-01-02       NaN       NaN  0.375000      NaN
+2013-01-03  0.209416       NaN       NaN      NaN
+2013-01-04       NaN  0.055251       NaN  1.16778
+2013-01-05  0.424516  0.229202  0.789282      NaN
+2013-01-06       NaN       NaN  0.429424  1.05688
+```
+> Using the isin() method for filtering:
+```python
+In [55]: df2 = df.copy()
+
+In [56]: df2['E'] = ['one', 'one','two','three','four','three']
+
+In [57]: df2[df2['E'].isin(['two','four'])]
+Out[57]:
+                   A         B         C         D     E
+2013-01-03  0.209416 -0.868301 -0.588193 -1.048233   two
+2013-01-05  0.424516  0.229202  0.789282 -0.799369  four
+```
+#### 5.3.5 Setting
+> Setting a new column automatically aligns the data by the indexes
+```python
+In [58]: s1 = pd.Series([1,2,3,4,5,6], index=pd.date_range('20130102', periods=6))
+
+In [59]: df['F'] = s1
+
+In [60]: df
+Out[60]:
+                   A         B         C         D    F
+2013-01-01  1.509470  1.690432 -0.969755 -0.210679  NaN
+2013-01-02 -1.104382 -0.032317  0.375000 -0.906115  1.0
+2013-01-03  0.209416 -0.868301 -0.588193 -1.048233  2.0
+2013-01-04 -1.481931  0.055251 -0.998916  1.167780  3.0
+2013-01-05  0.424516  0.229202  0.789282 -0.799369  4.0
+2013-01-06 -0.982473 -1.818939  0.429424  1.056880  5.0
+```
+> Setting values by label
+```python
+In [61]: df.at[dates[0],'A'] = 0
+
+In [62]: df.iat[0,1] = 0
+
+In [63]: df.loc[:,'D'] = np.array([5] * len(df))
+```
+> A where operation with setting.
+```python
+In [65]: df2
+Out[65]:
+                   A         B         C  D    F
+2013-01-01  0.000000  0.000000 -0.969755  5  NaN
+2013-01-02 -1.104382 -0.032317  0.375000  5  1.0
+2013-01-03  0.209416 -0.868301 -0.588193  5  2.0
+2013-01-04 -1.481931  0.055251 -0.998916  5  3.0
+2013-01-05  0.424516  0.229202  0.789282  5  4.0
+2013-01-06 -0.982473 -1.818939  0.429424  5  5.0
+
+In [66]: df2[df2 > 0]
+Out[66]:
+                   A         B         C  D    F
+2013-01-01       NaN       NaN       NaN  5  NaN
+2013-01-02       NaN       NaN  0.375000  5  1.0
+2013-01-03  0.209416       NaN       NaN  5  2.0
+2013-01-04       NaN  0.055251       NaN  5  3.0
+2013-01-05  0.424516  0.229202  0.789282  5  4.0
+2013-01-06       NaN       NaN  0.429424  5  5.0
+
+In [67]: df2[df2 > 0] = -df2
+
+In [68]: df2
+Out[68]:
+                   A         B         C  D    F
+2013-01-01  0.000000  0.000000 -0.969755 -5  NaN
+2013-01-02 -1.104382 -0.032317 -0.375000 -5 -1.0
+2013-01-03 -0.209416 -0.868301 -0.588193 -5 -2.0
+2013-01-04 -1.481931 -0.055251 -0.998916 -5 -3.0
+2013-01-05 -0.424516 -0.229202 -0.789282 -5 -4.0
+2013-01-06 -0.982473 -1.818939 -0.429424 -5 -5.0
+```
+### 5.4 Missing Data
+> Reindexing allows you to change/add/delete the index on a specified axis. This returns a copy of the data.
+```python
+In [69]: df1 = df.reindex(index=dates[0:4], columns=list(df.columns) + ['E'])
+
+In [71]: df1.loc[dates[0]:dates[1],'E'] = 1
+
+```
+>To drop any rows that have missing data
+```python
+In [72]: df1
+Out[72]:
+                   A         B         C  D    F    E
+2013-01-01  0.000000  0.000000 -0.969755  5  NaN  1.0
+2013-01-02 -1.104382 -0.032317  0.375000  5  1.0  1.0
+2013-01-03  0.209416 -0.868301 -0.588193  5  2.0  NaN
+2013-01-04 -1.481931  0.055251 -0.998916  5  3.0  NaN
+
+In [73]: df1.dropna(how='any')
+Out[73]:
+                   A         B      C  D    F    E
+2013-01-02 -1.104382 -0.032317  0.375  5  1.0  1.0
+```
+
+> Filling missing data
+```python
+In [74]: df1.fillna(value=5)
 
 ```
 
- > Note: If you have a Series where lots of elements are repeated (i.e. the number of unique elements in the Series is a lot smaller than the length of the Series), it can be faster to convert the original Series to one of type category and then use .str.<method> or .dt.<property> on that. The performance difference comes from the fact that, for Series of type category, the string operations are done on the .categories and not on each element of the Series.
+> To get the boolean mask where values are nan
+```python
+In [75]: pd.isna(df1)
 
-
-> Please note that a Series of type category with string .categories has some limitations in comparison of Series of type string (e.g. you can’t add strings to each other: s + " " + s won’t work if s is a Series of type category). Also, .str methods which operate on elements of type list are not available on such a Series.
-
-
-``` python
-# 将一个Series对象的元素变更为list对象
-s2 = pd.Series(['a_b_c', 'c_d_e', np.nan, 'f_g_h'])
-s2.str.split('_')
-
-# 获取 Series 对象中 list对象中的元素
-s2.str.split('_').str.get(1)
-
-s2.str.split('_').str[1]
-
-# 将 Series 对象扩展为一个 DataFrame， 使用 split 函数的 expand 参数
-s2.str.split('_', expand = True)
-
-# 限制设定的 split出来的个数, 使用 split 函数的 n 参数
-s2.str.split('_', expand = True, n = 1)
-
-# 从相反的方向进行 split 可以使用 rsplit 函数
-s2.str.rsplit('_', expand = True, n = 2)
-
-# replace 和 findall 函数的案例
-s3 = pd.Series(['A', 'B', 'C', 'Aaba', 'Baca', '', np.nan, 'CABA', 'dog', 'cat'])
-
-s3.str.replace('^.a|dog', 'XX-XX ', case=False)
-
-# 特殊符号的替换
-dollars = pd.Series(['12', '-$10', '$10,000'])
-
-# 简单的替换 $
-dollars.str.replace('$', '')
-
-# 如果要替换 -$
-dollars.str.replace(r'-\$', '-')
 ```
 
-> The replace method can also take a callable as replacement. It is called on every pat using re.sub(). The callable should expect one positional argument (a regex object) and return a string
+### 5.5 Operations
+#### 5.5.1 Stats
+> Operations in general exclude missing data
+```python
+In [76]: df.mean()
+Out[76]:
+A   -0.489142
+B   -0.405851
+C   -0.160527
+D    5.000000
+F    3.000000
+dtype: float64
 
-``` python
-# Reverse every lowercase alphabetic word
-pat = r'[a-z]+'
+In [77]: df.mean(1)
+Out[77]:
+2013-01-01    1.007561
+2013-01-02    1.047660
+2013-01-03    1.150584
+2013-01-04    1.114881
+2013-01-05    2.088600
+2013-01-06    1.525602
+Freq: D, dtype: float64
+```
+> Operating with objects that have different dimensionality and need alignment. In addition, pandas automatically broadcasts along the specified dimension
+```python
+In [78]: s = pd.Series([1,3,5,np.nan,6,8], index=dates)
 
-repl = lambda m: m.group(0)[ : : -1]
+In [79]: s
+Out[79]:
+2013-01-01    1.0
+2013-01-02    3.0
+2013-01-03    5.0
+2013-01-04    NaN
+2013-01-05    6.0
+2013-01-06    8.0
+Freq: D, dtype: float64
 
-pd.Series(['foo 123', 'bar baz', np.nan]).str.replace(pat, repl)
+In [80]: s = pd.Series([1,3,5,np.nan,6,8], index=dates).shift(2)
 
-# Using regex groups
-pat = r"(?P<one>\w+) (?P<two>\w+) (?P<three>\w+)"
+In [81]: s
+Out[81]:
+2013-01-01    NaN
+2013-01-02    NaN
+2013-01-03    1.0
+2013-01-04    3.0
+2013-01-05    5.0
+2013-01-06    NaN
+Freq: D, dtype: float64
 
-repl = lambda m: m.group('two').swapcase()
+In [82]: df
+Out[82]:
+                   A         B         C  D    F
+2013-01-01  0.000000  0.000000 -0.969755  5  NaN
+2013-01-02 -1.104382 -0.032317  0.375000  5  1.0
+2013-01-03  0.209416 -0.868301 -0.588193  5  2.0
+2013-01-04 -1.481931  0.055251 -0.998916  5  3.0
+2013-01-05  0.424516  0.229202  0.789282  5  4.0
+2013-01-06 -0.982473 -1.818939  0.429424  5  5.0
 
-pd.Series(['Foo Bar Baz', np.nan]).str.replace(pat, repl)
+In [83]: df.sub(s, axis='index')
+Out[83]:
+                   A         B         C    D    F
+2013-01-01       NaN       NaN       NaN  NaN  NaN
+2013-01-02       NaN       NaN       NaN  NaN  NaN
+2013-01-03 -0.790584 -1.868301 -1.588193  4.0  1.0
+2013-01-04 -4.481931 -2.944749 -3.998916  2.0  0.0
+2013-01-05 -4.575484 -4.770798 -4.210718  0.0 -1.0
+2013-01-06       NaN       NaN       NaN  NaN  NaN
 ```
 
-> The replace method also accepts a compiled regular expression object from re.compile() as a pattern. All flags should be included in the compiled regular expression object.
+#### 5.5.2 Apply
+> Applying functions to the data
+```python
+In [84]: df.apply(np.cumsum)
 
-``` python
-import re
+In [85]: df.apply(lambda x: x.max() - x.min())
 
-regex_pat = re.compile(r'^.a|dog', flags=re.IGNORECASE)
+```
+#### 5.5.3 Histogramming
+```python
+In [86]: s = pd.Series(np.random.randint(0, 7, size=10))
 
-s3.str.replace(regex_pat, 'XX-XX ')
-
-# Including a flags argument when calling replace with a compiled regular expression object will raise a ValueError.
-s3.str.replace(regex_pat, 'XX-XX ', flags=re.IGNORECASE)
+In [87]: s.value_counts()
 ```
 
-> You can use [] notation to directly index by position locations. If you index past the end of the string, the result will be a NaN
+#### 5.5.4 String Methods
+> Series is equipped with a set of string processing methods in the str attribute that make it easy to operate on each element of the array
+```python
+In [88]: s = pd.Series(['A', 'B', 'C', 'Aaba', 'Baca', np.nan, 'CABA', 'dog', 'cat'])
 
-``` python
-s = pd.Series(['A', 'B', 'C', 'Aaba', 'Baca', np.nan, 'CABA', 'dog', 'cat'])
+In [89]: s.str.upper()
 
-s.str[0]
+In [90]: s.str.lower()
 
-s.str[1]
 ```
 
+### 5.6 Merge
+#### 5.6.1 Concat
+> Concatenating pandas objects together with concat():
+```python
+In [91]: df = pd.DataFrame(np.random.randn(10, 4))
 
+# break it into pieces
+In [93]: pieces = [df[:3], df[3:7], df[7:]]
 
+In [94]: pieces
+Out[94]:
+[          0         1         2         3
+ 0 -0.614175  1.292729  0.918938  0.293192
+ 1 -0.857969  0.070571 -0.118315 -1.265318
+ 2  2.127979 -1.084430  0.509884 -0.438967,
+           0         1         2         3
+ 3 -0.622106  1.082788 -0.234932 -1.144742
+ 4  1.959651  0.437238  0.288533 -0.660960
+ 5 -0.591373  0.283814 -0.451910 -1.343372
+ 6  1.127774 -0.737363  0.304315  0.302072,
+           0         1         2         3
+ 7  1.177588 -1.140446  0.439324 -1.198692
+ 8  0.729143  0.468971  2.293460  1.014457
+ 9  0.397685  0.951461  0.798795 -0.750922]
 
-## IO TOOLS (TEXT, CSV, HDF5, ...)
+ In [95]: pd.concat(pieces)
+Out[95]:
+          0         1         2         3
+0 -0.614175  1.292729  0.918938  0.293192
+1 -0.857969  0.070571 -0.118315 -1.265318
+2  2.127979 -1.084430  0.509884 -0.438967
+3 -0.622106  1.082788 -0.234932 -1.144742
+4  1.959651  0.437238  0.288533 -0.660960
+5 -0.591373  0.283814 -0.451910 -1.343372
+6  1.127774 -0.737363  0.304315  0.302072
+7  1.177588 -1.140446  0.439324 -1.198692
+8  0.729143  0.468971  2.293460  1.014457
+9  0.397685  0.951461  0.798795 -0.750922
+```
+#### 5.6.2 Join
+```python
+In [96]: left = pd.DataFrame({'key': ['foo', 'foo'], 'lval': [1, 2]})
 
-|Format Type|Data Description|Reader|Writer|
-|--|--|--|--|
-|text |CSV |read_csv |to_csv|
-|text |JSON |read_json |to_json|
-|text |HTML |read_html |to_html|
-|text |Local clipboard |read_clipboard |to_clipboard|
-|binary |MS Excel |read_excel |to_excel|
-|binary |HDF5 Format |read_hdf |to_hdf|
-|binary |Feather Format |read_feather |to_feather|
-|binary |Parquet Format| read_parquet |to_parquet|
-|binary |Stata |read_stata |to_stata|
-|binary |Msgpack |read_msgpack |to_msgpack|
-|binary |SAS |read_sas||
-|binary |Python Pickle Format |read_pickle |to_pickle|
-|SQL |SQL |read_sql |to_sql|
-|SQL |Google Big Query |read_gbq |to_gbq|
+In [97]: right = pd.DataFrame({'key': ['foo', 'foo'], 'rval': [4, 5]})
 
+In [98]: pd.merge(left, right, on='key')
+```
 
-> Note: For examples that use the StringIO class, make sure you import it according to your Python version, i.e.
-from StringIO import StringIO for Python 2 and from io import StringIO for Python 3.
+### 5.6.3 Append
+```python
+In [99]: df = pd.DataFrame(np.random.randn(8, 4), columns=['A','B','C','D'])
 
-### 24.1 CSV & Text files
+In [101]: s = df.iloc[3]
 
-#### 24.1.1 Parsing options
+In [104]: df.append(s, ignore_index=True)
+```
 
-> read_csv() and read_table() accept the following arguments:
+### 5.7 Grouping
+- Splitting the data into groups based on some criteria
+- Applying a function to each group independently
+- Combining the results into a data structure
+```python
+In [105]: df = pd.DataFrame({'A' : ['foo', 'bar', 'foo', 'bar','foo', 'bar', 'foo', 'foo'],
+     ...: 'B' : ['one', 'one', 'two', 'three', 'two', 'two', 'one', 'three'],
+     ...: 'C' : np.random.randn(8),
+     ...: 'D' : np.random.randn(8)})
+```
+
+> Grouping and then applying a function sum to the resulting groups.
+```python
+In [107]: df.groupby('A').sum()
+```
+
+> Grouping by multiple columns forms a hierarchical index, which we then apply the function
+```python
+In [108]: df.groupby(['A','B']).sum()
+Out[108]:
+                  C         D
+A   B
+bar one   -0.586807  1.017495
+    three  0.271996 -0.653116
+    two    1.732780  0.906312
+foo one   -0.106569  0.787432
+    three  2.411684  0.227292
+    two    1.661608 -1.273156
+```
+
+### 5.8 Reshaping
+#### 5.8.1 Stack
+
+```python
+In [114]: tuples = list(zip(*[['bar', 'bar', 'baz', 'baz',
+     ...: 'foo', 'foo', 'qux', 'qux'],
+     ...: ['one', 'two', 'one', 'two',
+     ...: 'one', 'two', 'one', 'two']]))
+
+     In [116]: index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second'])
+
+In [117]: index
+Out[117]:
+MultiIndex(levels=[['bar', 'baz', 'foo', 'qux'], ['one', 'two']],
+           labels=[[0, 0, 1, 1, 2, 2, 3, 3], [0, 1, 0, 1, 0, 1, 0, 1]],
+           names=['first', 'second'])
+
+In [118]: df = pd.DataFrame(np.random.randn(8, 2), index=index, columns=['A', 'B'])
+
+```
+> The stack() method “compresses” a level in the DataFrame’s columns.
+```python
+In [125]: df2
+Out[125]:
+                     A         B
+first second
+bar   one    -1.893055 -1.661977
+      two    -0.597097 -0.550415
+baz   one    -0.669136 -0.058023
+      two    -0.476634  0.273827
+
+In [126]: df2.stack()
+Out[126]:
+first  second
+bar    one     A   -1.893055
+               B   -1.661977
+       two     A   -0.597097
+               B   -0.550415
+baz    one     A   -0.669136
+               B   -0.058023
+       two     A   -0.476634
+               B    0.273827
+dtype: float64
+```
+
+> With a “stacked” DataFrame or Series (having a MultiIndex as the index), the inverse operation of stack() is unstack(), which by default unstacks the last level:
+```python
+In [128]: stacked
+Out[128]:
+first  second
+bar    one     A   -1.893055
+               B   -1.661977
+       two     A   -0.597097
+               B   -0.550415
+baz    one     A   -0.669136
+               B   -0.058023
+       two     A   -0.476634
+               B    0.273827
+dtype: float64
+
+In [129]: stacked.unstack()
+Out[129]:
+                     A         B
+first second
+bar   one    -1.893055 -1.661977
+      two    -0.597097 -0.550415
+baz   one    -0.669136 -0.058023
+      two    -0.476634  0.273827
+
+In [130]: stacked.unstack(0)
+Out[130]:
+first          bar       baz
+second
+one    A -1.893055 -0.669136
+       B -1.661977 -0.058023
+two    A -0.597097 -0.476634
+       B -0.550415  0.273827
+```
+
+#### 5.8.2 Pivot Tables
+```python
+In [131]: df = pd.DataFrame({'A' : ['one', 'one', 'two', 'three'] * 3,
+     ...: 'B' : ['A', 'B', 'C'] * 4,
+     ...: 'C' : ['foo', 'foo', 'foo', 'bar', 'bar', 'bar'] * 2,
+     ...: 'D' : np.random.randn(12),
+     ...: 'E' : np.random.randn(12)})
+
+```
+> We can produce pivot tables from this data very easily
+```python
+In [133]: pd.pivot_table(df, values='D', index=['A', 'B'], columns=['C'])
+Out[133]:
+C             bar       foo
+A     B
+one   A  0.286501  0.125153
+      B -0.192352  0.862010
+      C  0.362863 -2.070379
+three A  0.082135       NaN
+      B       NaN  0.375914
+      C  0.156249       NaN
+two   A       NaN -2.126993
+      B  1.069589       NaN
+      C       NaN -1.056874
+```
+
+## 5.9 Time Series
+```python
+In [136]: rng = pd.date_range('1/1/2012', periods=100, freq='S')
+
+In [137]: ts = pd.Series(np.random.randint(0, 500, len(rng)), index=rng)
+
+In [138]: ts.resample('5Min').sum()
+Out[138]:
+2012-01-01    26205
+Freq: 5T, dtype: int32
+```
