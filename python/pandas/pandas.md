@@ -636,4 +636,14 @@ In [138]: ts.resample('5Min').sum()
 Out[138]:
 2012-01-01    26205
 Freq: 5T, dtype: int32
+
+In [139]: rng = pd.date_range('3/6/2012 00:00', periods=5, freq='D')
+
+In [141]: ts = pd.Series(np.random.randn(len(rng)), rng)
+
+In [143]: ts_utc = ts.tz_localize('UTC')
+
+In [145]: ts_utc.tz_convert('US/Eastern')
+
+In [146]: rng = pd.date_range('1/1/2012', periods=5, freq='M')
 ```
