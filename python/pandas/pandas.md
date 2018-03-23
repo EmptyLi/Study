@@ -646,4 +646,14 @@ In [143]: ts_utc = ts.tz_localize('UTC')
 In [145]: ts_utc.tz_convert('US/Eastern')
 
 In [146]: rng = pd.date_range('1/1/2012', periods=5, freq='M')
+
+In [147]: ps = ts.to_period()
+Out[148]:
+2012-03-06   -0.898127
+2012-03-07    1.149241
+2012-03-08    1.423320
+2012-03-09   -0.356556
+2012-03-10    0.109979
+Freq: D, dtype: float64
+
 ```
