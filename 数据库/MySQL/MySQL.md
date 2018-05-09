@@ -1400,3 +1400,387 @@ LOCK TABLE 表名 READ;
 > 4.意向独占所【IX】 ， 事务打算给数据行加行排他锁， 事务在给数据行加排他锁前必须先取得该表的IX锁
 > 5.重点， 通过给索引上的索引项加锁来实现行锁， 这种特点也就意味着， 只有通过索引条件检索数据， InnoDB才能使用行锁， 否则， InnoDB将使用表锁
 > 注意， 意向锁不能和表锁完全划等号， MySQL里的表锁一般是指MyISAM那中LOCK TABLE XX READ[WRITE]的表锁
+
+
+
+
+
+
+
+
+
+
+
+
+select substring_index(host,':',1) as ip,
+       count(*)
+  from information_schema.processlist;
+ group by ip;
+
+影响排序结果
+sort_buffer
+
+影响连接
+
+innodb内存
+innodb_buffer_pool_size： 物理内存的 50% ~ 80%
+innodb_buffer_pool_wait_free 过大，需要增加innodb_buffer_pool_size的大小
+
+innodb_buffer_pool_instances 看是否合适，需要增大其值的大小（根据物理内存的情况）
+查看innodb使用情况
+show engine innodb status;
+
+
+
+## 日志文件
+### 1、错误日志
+```sql
+show variables like '%err%';
+```
+
+> 对于mysql启动，运行，关闭过程进行了记录。不但记录了出错信息，也记录了一些告警信息或者正确信息，类型于oracle的alter日志文件
+> 有时在error_log里面的warnings信息中，获取到优化的帮助
+
+```sql
+show variables like 'log_error%';
+```
+### 2、慢日志
+> 查看慢查询是否开启了,当慢查询日志很大的时候，使用mysqldumpslow命令进行查看
+
+```sql
+show variables like '%slow%';
+设置慢查询的秒数
+show variables like '%long%';
+
+# 按照执行时间
+[root@localhost ~]# mysqldumpslow -s at -n 10 /var/lib/mysql/localhost-slow.log
+
+Reading mysql slow query log from /var/lib/mysql/localhost-slow.log
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
+
+# 按照锁定时间
+[root@localhost ~]# mysqldumpslow -s a1 -n 10 /var/lib/mysql/localhost-slow.log
+
+Reading mysql slow query log from /var/lib/mysql/localhost-slow.log
+Count: 1  Time=0.00s (0s)  Lock=0.00s (0s)  Rows=0.0 (0), 0users@0hosts
+
+如果运行的sql语句没有使用索引，则mysql数据库同样会将这条sql语句记录到慢查询日志文件中
+set global log_queries_not_using_indexes = on;
+
+
+
+mysql> show variables like 'log_queries%';
++-------------------------------+-------+
+| Variable_name                 | Value |
++-------------------------------+-------+
+| log_queries_not_using_indexes | OFF   |
++-------------------------------+-------+
+1 row in set (0.00 sec)
+```
+#### 慢查询的输出格式
+> mysql 5.1 之后，可以将慢查询的日志记录放入一张表中。
+> log_output：指定了慢查询输出格式，默认为fule，可以将它设置为table
+
+```sql
+mysql> show variables like '%output%';
++----------------------------+-------+
+| Variable_name              | Value |
++----------------------------+-------+
+| innodb_status_output       | OFF   |
+| innodb_status_output_locks | OFF   |
+| log_output                 | FILE  |
++----------------------------+-------+
+3 rows in set (0.00 sec)
+```
+> 当数据量较大的时候，查询效率可能不高，可以把csv引擎调整为myisam存储引擎(不推荐)
+log_output 不能通过 set 命令去设定
+
+
+### 3、查询日志（全日志）
+> 查询日志记录了所有的对mysql数据库请求的信息，不论这些请求是否得到了正确的执行
+> 该参数为：general_log默认是关闭的
+```sql
+mysql> show variables like 'general_log%';
++------------------+------------------------------+
+| Variable_name    | Value                        |
++------------------+------------------------------+
+| general_log      | OFF                          |
+| general_log_file | /var/lib/mysql/localhost.log |
++------------------+------------------------------+
+2 rows in set (0.00 sec)
+```
+
+### 4、二进制日志
+> 记录了数据库执行更改的所有操作，但是并不包括select和show这类操作，因为这类操作没有对数据本身进行修改
+二进制包括了执行数据库更改操作的时间和执行时间等信息
+
+```sql
+mysql> show variables like '%binlog%';
+mysql> show variables like 'data';
+
+[root@localhost mysql]# mysqlbinlog --help
+mysqlbinlog --no-defaults -v -V base64-output=decode-row
+```
+#### 1、恢复
+> 某些数据的恢复需要二进制日志，当一个数据库全被文件恢复后，我们可以通过二进制日志进行 point_in_time 恢复
+
+#### 2、复制
+  通过复制和执行二进制日志使得一台远程的mysql数据库(slave或叫standby)与一台mysql数据库(master, primary)进行实时同步
+
+命名规则：log-bin[=name]
+
+  影响二进制日志记录的信息和行为参数如下
+  - 1、max_binlog_size
+    指定单个二进制日志文件的最大值，如果超过该值，则产生新的二进制文件从MySQL5.0开始默认值从1G，之前的版本默认是1.1G
+  - 2、binlog_cache_size
+    所有未提交的二进制文件会被记录到一个缓存中，等该事务提交时直接将缓冲中的二进制日志写入二进制日志文件，默认是32KB
+    基于会话的，一个线程开始一个事务，mysql会自动分配一个大小为binlog_cache_size的缓存。当一个事务的记录大于设定的
+    binlog_cache_size会把缓冲中的日志写入一个临时文件
+    目前使用情况：binlog_cache_use
+                 binlog_cache_disk_use
+```sql
+mysql> show global status like 'bin%';
++----------------------------+-------+
+| Variable_name              | Value |
++----------------------------+-------+
+| Binlog_cache_disk_use      | 0     |
+| Binlog_cache_use           | 0     |
+| Binlog_stmt_cache_disk_use | 0     |
+| Binlog_stmt_cache_use      | 0     |
++----------------------------+-------+
+4 rows in set (0.26 sec)
+```
+3、sync_binlog
+  =0 当事务提交之后，mysql不做sfync之类的磁盘同步指令刷新 binlog_cache中的信息到磁盘，而让filesystem自行决定什么时候来做同步
+     或者cache满了之后才同步到磁盘
+  =1 表示采用同步写磁盘的方式来写二进制日志，这时写操作不使用操作系统的缓冲来写二进制日志
+  =N 每进行n次事务提交之后，mysql将进行一次fsync之类的磁盘同步指令来将binlog_cache中的数据强制写入磁盘
+  主从架构的时候一下参数含义
+  4、binlog-do-db
+  5、binlog-ignore-db
+  6、log-slave-update
+  7、binlog-format
+
+### 5、套接字文件
+> unix系统下本地连接mysql可以采用unix域套接字方式，这种方式需要一个套接字文件。套接字文件由参数socket控制一般在/tmp目录下，名为mysql.sock
+```sql
+mysql> show variables like '%socket%';
++-----------------------------------------+---------------------------+
+| Variable_name                           | Value                     |
++-----------------------------------------+---------------------------+
+| performance_schema_max_socket_classes   | 10                        |
+| performance_schema_max_socket_instances | -1                        |
+| socket                                  | /var/lib/mysql/mysql.sock |
++-----------------------------------------+---------------------------+
+3 rows in set (0.00 sec)
+```
+### 6、PID文件
+> 当mysql实例启动时，会将自己的进程ID写入一个文件中一该文件即为PID文件，该文件由参数pid_file。默认路径位于数据库目录下
+
+```sql
+mysql> show variables like '%pid_file%';
++---------------+----------------------------+
+| Variable_name | Value                      |
++---------------+----------------------------+
+| pid_file      | /var/run/mysqld/mysqld.pid |
++---------------+----------------------------+
+1 row in set (0.00 sec)
+```
+### 7、表结构定义文件
+> 因为mysql插件式存储引擎的体系结构的关系，mysql对于数据的存储是按照表的，所以每个表都会有与之对应的文件无论采用何种存储引擎，mysql都有一个以frm为后缀名的文件，该文件记录着该表的表结构定义
+
+### 8、Innodb存储引擎文件
+> 每个表存储引擎还有其自己独有的文件
+> 包括重做日志文件，表空间文件
+
+> 表空间文件：将存储的数据按表空间进行存放，默认配置下，会有一个初始化大小为10MB，名为ibdata1的文件，该文件就是默认的表空间文件
+
+```sql
+  innodb_data_file_path=datafile_spec1[;datafile_spec2]...
+
+  [mysqld]
+  innodb_data_file_path=/db/ibdata1:2000M;/dr2/db/ibdata2:2000M;autoextend
+```
+> 独立表空间：innodb_file_per_table
+> 每个基于innodb存储引擎的表单独产生一个表空间，文件名为表名 .ibd 这样不用将所有数据都存放于默认的表空间
+```sql
+mysql> show variables like 'innodb_file_per_table';
++-----------------------+-------+
+| Variable_name         | Value |
++-----------------------+-------+
+| innodb_file_per_table | ON    |
++-----------------------+-------+
+1 row in set (0.01 sec)
+```
+
+### 9、重做日志文件 redo log file
+> ib_logfile0和ib_logfile1文件对于innodb存储引擎至关重要，他们记录了对于innodb存储引擎的事务日志.重做日志文件的主要目的：实例或者介质失败，主机掉电导致实例失败，innodb存储引擎会使用重做日志恢复掉电前的时刻，来保证数据的完整性.每个innodb存储引擎至少一个重做日志组(group)每个组下至少有两个重做日志文件，两个日志文件大小一致，并循环方式使用
+  - innodb_log_file_size
+      > 指定重做日志大小
+  - innodb_log_files_in_group
+      > 指定日志文件组中做日志文件的数量 ，默认为2
+  - innodb_mirrored_log_groups
+      > 指定日志镜像文件组的数量，默认为1，代表只有一个日志文件组没有镜像
+  - innodb_log_group_home_dir
+      > 指定了日志文件组所在路径
+
+
+### 10、二进制日志与重做日志的区别
+#### 区别：
+> 二进制日志会记录所有与mysql有关的日志记录，包括innodb，myisam，heap等其他存储引擎日志，而innodb存储引擎的重做日志只记录有关其自身的事务日志
+#### 记录的内容不同：
+> 二进制日志记录的都是一个关于一个事务的具体操作内容，而innodb存储引擎的重做日志记录的关于每个页的更改物理量情况
+#### 写入时间不同：
+> 二进制日志文件是在事务提交时进行记录的，而在事务进行的过程中，不断有重做日志条目被写入重做日志文件
+#### 重做写的方式 redo log buffer
+> 对于写入重做日志的操作不是直接写，而是先写一个重做日志缓冲 redo log buffer，然后根据按照一定的条件写入日志文件
+
+### 11、触发写redo log的条件
+- 1、master thread 每秒的操作都会将重做日志缓冲写入磁盘的重做日志文件中，不论事务是否已经提交
+- 2、由参数 innodb_flush_log_at_trx_commit 控制
+  0代表：当提交事务时，并不将事务的重做日志写入磁盘上的日志文件，而是等待主线程每秒的刷新
+  1代表：在commit时将重做日志缓冲同步写到磁盘
+  2代表：重做日志异步写到磁盘，不能完全保证commit时肯定会写入重做日志文件
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 数据库表
+> innodb存储引擎表类型
+> 在innodb存储引擎表中，每个表都有个主键，如果在创建表时没有显示地定义主键，则innodb存储引擎会按照如下方式选择或创建主键
+
+1、首先表中是否有非空的唯一索引(unique not null)如果有则该列为主键
+2、不符合上述条件的，innodb存储引擎自动创建一个6字节大小的指针
+
+```sql
+create table mytab(
+   id int(10) unsigned not null auto_increment,
+   c1 int(11) not null default '0',
+   c2 int(10) unsigned default null,
+   c5 int(10) unsigned not null default '0',
+   c3 timestamp not null default current_timestamp on update current_timestamp,
+   c4 varchar(200) not null default '',
+   primary key(id),
+   key idx_c1(c1),
+   key key_c2(c2)
+) engine=innodb auto_increment=2686347;
+```
+
+> 重置 auto_increment
+```sql
+mysql> create table mytab(
+    -> id int(10) unsigned not null auto_increment,
+    -> c1 int(11) not null default '0',
+    -> primary key(id))
+    -> engine=innodb auto_increment=300;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> insert into mytab(c1) values(1),(2);
+Query OK, 2 rows affected (0.12 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql> select * from mytab;
++-----+----+
+| id  | c1 |
++-----+----+
+| 300 |  1 |
+| 301 |  2 |
++-----+----+
+2 rows in set (0.05 sec)
+
+mysql> delete from mytab;
+Query OK, 2 rows affected (0.03 sec)
+
+mysql> insert into mytab(c1) values(1),(2);
+Query OK, 2 rows affected (0.00 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql> select * from mytab;
++-----+----+
+| id  | c1 |
++-----+----+
+| 302 |  1 |
+| 303 |  2 |
++-----+----+
+2 rows in set (0.00 sec)
+
+mysql> truncate table mytab;
+Query OK, 0 rows affected (0.20 sec)
+
+mysql> insert into mytab(c1) values(1),(2);
+Query OK, 2 rows affected (0.00 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql> select * from mytab;
++----+----+
+| id | c1 |
++----+----+
+|  1 |  1 |
+|  2 |  2 |
++----+----+
+2 rows in set (0.00 sec)
+
+mysql> show create table mytab\G
+*************************** 1. row ***************************
+       Table: mytab
+Create Table: CREATE TABLE `mytab` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `c1` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1
+1 row in set (0.00 sec)
+
+```
+
+## innodb的逻辑存储单元
+### tablespace
+> 所有数据都是存放在表空间中的，启用了参数 innodb_file_per_table,则每张表内的数据可以单独放到
+
+### segment
+> 常见的segment 有数据段、索引段、回滚段
+> innodb的索引聚集表，所以数据就是索引，索引就是数据
+> 数据段即是B+树的页节点(leaf node segment)
+> 索引段即为B+树的非索引节点(non-leaf node segment)
+> 段的管理是由引擎本身完成
+
+### extend
+> 区由64个连续的页组成
+> 每个页大小16k
+> 即每个区的大小为 64 * 16k = 1mb
+> 对于大的数据段，mysql每次最多可以申请4个区，以此保证数据的顺序性能
+
+### page
+> 页是innodb磁盘管理啊的最小的单位
+> innodb每个页的大小是16k

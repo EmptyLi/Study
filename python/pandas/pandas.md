@@ -657,3 +657,30 @@ Out[148]:
 Freq: D, dtype: float64
 
 ```
+
+
+
+
+
+
+
+
+
+
+### 21.1 Object Creation
+> 创建分类数据的几种方法
+- 方法一 定义 dtype="category"
+```python
+s = pd.Series(["a", "b", "c"], dtype="category")
+```
+
+- 方法二 直接使用astype转换
+```python
+In [4]: s = pd.DataFrame({'A':["a","b","c"]})
+In [6]: s["B"] = s["A"].astype("category")
+```
+
+- 方法三 分配一个Category 对象给一个Series 或 DataFrame
+```python
+ 
+```
