@@ -55,3 +55,5 @@ alter index rating_hist_factor_score_pkey rename to ray_rating_hist_factor_score
 commit;
 alter index pk_bond_factor_option rename to ray_pk_bond_factor_option;
 commit;
+
+ALTER SEQUENCE seq_lkp_finansubject_disp rename  to ray_seq_lkp_finansubject_disp;

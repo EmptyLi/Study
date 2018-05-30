@@ -51,3 +51,6 @@ commit;
 
 drop index if exists ray_pk_bond_factor_option;
 commit;
+
+drop sequence if exists ray_seq_lkp_finansubject_disp;
+commit;
