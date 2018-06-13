@@ -1,0 +1,2 @@
+ALTER SEQUENCE ray_seq_lkp_finansubject_disp rename  to seq_lkp_finansubject_disp;
+commit;

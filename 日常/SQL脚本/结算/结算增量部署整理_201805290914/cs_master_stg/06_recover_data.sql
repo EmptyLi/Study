@@ -1,3 +1,5 @@
+delete from stg_bond_warrantor where 1 = 1;
+commit;
 insert into stg_bond_warrantor
    (record_sid
    ,bond_warrantor_sid
@@ -70,6 +72,8 @@ select record_sid
 from ray_stg_bond_warrantor;
 commit;
 
+delete from stg_bond_pledge where 1 = 1;
+commit;
 insert into stg_bond_pledge
    (
       record_sid
@@ -121,6 +125,8 @@ select
 from ray_stg_bond_pledge;
 commit;
 
+delete from hist_bond_warrantor where 1 = 1;
+commit;
 insert into hist_bond_warrantor
    (record_sid
    ,bond_warrantor_sid
@@ -194,12 +200,14 @@ select
 from ray_hist_bond_warrantor;
 commit;
 
+delete from hist_bond_pledge where 1 = 1;
+commit;
 insert into hist_bond_pledge
    (record_sid
    ,bond_pledge_sid
    ,secinner_id
    ,rpt_dt
-   ,notice_dt         
+   ,notice_dt
    ,pledge_nm
    ,pledge_type_id
    ,pledge_desc

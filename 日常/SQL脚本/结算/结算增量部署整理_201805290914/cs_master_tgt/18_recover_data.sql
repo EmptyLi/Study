@@ -1,3 +1,5 @@
+delete from bond_warrantor where 1 = 1;
+commit;
 insert into bond_warrantor
 (bond_warrantor_sid,
 	secinner_id,
@@ -67,6 +69,8 @@ bond_warrantor_sid,
 from ray_bond_warrantor;
 commit;
 
+delete from bond_pledge where 1 = 1;
+commit;
 insert into bond_pledge
 (
 	bond_pledge_sid,
@@ -115,6 +119,8 @@ from ray_bond_pledge;
 commit;
 
 -- model_id 默认为1
+delete from lkp_ratingcd_xw where model_id = 1 and constant_type <> 5;
+commit;
 insert into lkp_ratingcd_xw
 (
 	model_id,
@@ -135,6 +141,8 @@ where model_id = 1 and constant_type <> 5
 ;
 
 -- is_active 默认为1生效
+delete from bond_rating_model where 1 = 1;
+commit;
 insert into bond_rating_model
 (
 	model_id,

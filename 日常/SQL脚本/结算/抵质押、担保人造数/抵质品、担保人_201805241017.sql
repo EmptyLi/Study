@@ -27,7 +27,7 @@ VALUES (99999999999999,
  '7116236',
  'CSCS',
         0,
-        clock_timestamp());
+        systimestamp);
 commit;
 INSERT INTO public.bond_party
 (bond_party_sid,
@@ -55,7 +55,7 @@ VALUES (99999999999998,
  '7155887',
  'CSCS',
  0,
- clock_timestamp());
+ systimestamp);
 commit;
 
 -- 场景十二：多发行人多抵质押无担保人
@@ -87,7 +87,7 @@ VALUES (99999999999997,
  '7155887',
  'CSCS',
  0,
- clock_timestamp());
+ systimestamp);
 commit;
 
 -- 场景十：多发行人无抵质押单担保人
@@ -122,7 +122,7 @@ VALUES (99999999999996,
  '7155887',
  'CSCS',
  0,
- clock_timestamp());
+ systimestamp);
 commit;
 INSERT INTO public.bond_party
 (bond_party_sid,
@@ -150,7 +150,7 @@ VALUES (99999999999995,
  '7116236',
  'CSCS',
         0,
-        clock_timestamp());
+        systimestamp);
 commit;
 
 -- 场景九：多发行人单抵质押无担保人
@@ -183,7 +183,7 @@ VALUES (99999999999994,
  '7116236',
  'CSCS',
         0,
-        clock_timestamp());
+        systimestamp);
 commit;
 
 -- 场景八：多发行人无抵质押无担保人
@@ -216,7 +216,7 @@ VALUES (99999999999993,
  '7116236',
  'CSCS',
         0,
-        clock_timestamp());
+        systimestamp);
 commit;
 
 -- 场景十一：多发行人单抵质押单担保人
@@ -248,7 +248,7 @@ VALUES (99999999999992,
  '7116236',
  'CSCS',
         0,
-        clock_timestamp());
+        systimestamp);
 commit;
 
 update bond_pledge t
@@ -267,13 +267,13 @@ select * from bond_pledge where isdel = 0 and bond_pledge_sid = '10000000001379'
 INSERT INTO public.bond_pledge (bond_pledge_sid, secinner_id, rpt_dt, notice_dt, pledge_nm, pledge_type_id, pledge_desc, pledge_owner_id, pledge_owner, pledge_value, priority_value, pledge_depend_id, pledge_control_id, region, mitigation_value, isdel, srcid, src_cd, updt_by, updt_dt)
 VALUES
  (99999999999999, 17570799, '2016-12-31', '2017-06-27', '子公司土地使用权', 6797, null, null, null, 1.9899, 0.0000, 6584, 6580,
-  640000, 0.7562, 0, '999999', 'CSCS', 0, clock_timestamp());
+  640000, 0.7562, 0, '999999', 'CSCS', 0, systimestamp);
 commit;
 INSERT INTO public.bond_pledge (bond_pledge_sid, secinner_id, rpt_dt, notice_dt, pledge_nm, pledge_type_id, pledge_desc, pledge_owner_id, pledge_owner, pledge_value, priority_value, pledge_depend_id, pledge_control_id, region, mitigation_value, isdel, srcid, src_cd, updt_by, updt_dt)
 VALUES
  (99999999999998, 17570799, '2016-12-31', '2017-07-21', '公司以其全资子公司欧亚集团沈阳联营有限公司合法拥有的房地产为本期债券提供抵押担保', 6799, null, null,
                   null, 10.2362, 0.0000, 6584, 6580, 220000, 3.1118, 0, '999999', 'CSCS', 0,
-clock_timestamp());
+systimestamp);
 
 
 select * from bond_warrantor where isdel = 0 and bond_warrantor_sid = '10000000014206';
@@ -287,7 +287,7 @@ VALUES (99999999999999, 17570799, '2016-12-31', null, null, 8111, null, 206352, 
                                                                                                               null,
                                                                                                               6603,
                                                                                                               null,
- null, null, null, null, null, null, 0, '999999', 'CSCS', 0, clock_timestamp());
+ null, null, null, null, null, null, 0, '999999', 'CSCS', 0, systimestamp);
 
 INSERT INTO public.bond_warrantor (bond_warrantor_sid, secinner_id, rpt_dt, notice_dt, warranty_rate, guarantee_type_id, warranty_period, warrantor_id, warrantor_nm, warrantor_type_id, start_dt, end_dt, warranty_amt, warrantor_resume, warranty_contract, warranty_benef, warranty_content, warranty_type_id, warranty_claim, warranty_strength_id, pay_step, warranty_fee, exempt_set, warranty_obj, isser_credit, src_updt_dt, mitigation_value, isdel, srcid, src_cd, updt_by, updt_dt)
 VALUES (99999999999998, 17570799, '2016-12-31', '2017-12-15', null, 8111, null, 83463, '碧桂园控股有限公司', 6592, null, null,
@@ -300,7 +300,7 @@ VALUES (99999999999998, 17570799, '2016-12-31', '2017-12-15', null, 8111, null, 
                                                                                                                 null,
                                                                                                                 6597,
                                                                                                                 null,
- null, null, null, null, null, null, 0, '999999', 'CSCS', 0, clock_timestamp());
+ null, null, null, null, null, null, 0, '999999', 'CSCS', 0, systimestamp);
 commit;
 
 
@@ -315,7 +315,7 @@ select * from bond_pledge where isdel = 0 and bond_pledge_sid = '10000000001379'
 INSERT INTO public.bond_pledge (bond_pledge_sid, secinner_id, rpt_dt, notice_dt, pledge_nm, pledge_type_id, pledge_desc, pledge_owner_id, pledge_owner, pledge_value, priority_value, pledge_depend_id, pledge_control_id, region, mitigation_value, isdel, srcid, src_cd, updt_by, updt_dt)
 VALUES
  (99999999999997, 30870245, '2016-12-31', '2017-06-27', '子公司土地使用权', 6797, null, null, null, 1.9899, 0.0000, 6584, 6580,
-  640000, 0.7562, 0, '999999', 'CSCS', 0, clock_timestamp());
+  640000, 0.7562, 0, '999999', 'CSCS', 0, systimestamp);
 commit;
 
 select * from bond_warrantor where isdel = 0 and bond_warrantor_sid = '10000000014206';
@@ -329,7 +329,7 @@ VALUES (99999999999997, 30870245, '2016-12-31', null, null, 8111, null, 206352, 
                                                                                                               null,
                                                                                                               6603,
                                                                                                               null,
- null, null, null, null, null, null, 0, '999999', 'CSCS', 0, clock_timestamp());
+ null, null, null, null, null, null, 0, '999999', 'CSCS', 0, systimestamp);
 
 commit;
 
@@ -368,7 +368,7 @@ VALUES (99999999999991,
  '7155887',
  'CSCS',
  0,
- clock_timestamp());
+ systimestamp);
 commit;
 INSERT INTO public.bond_party
 (bond_party_sid,
@@ -396,20 +396,20 @@ VALUES (99999999999990,
  '7116236',
  'CSCS',
         0,
-        clock_timestamp());
+        systimestamp);
 commit;
 
 
 INSERT INTO public.bond_pledge (bond_pledge_sid, secinner_id, rpt_dt, notice_dt, pledge_nm, pledge_type_id, pledge_desc, pledge_owner_id, pledge_owner, pledge_value, priority_value, pledge_depend_id, pledge_control_id, region, mitigation_value, isdel, srcid, src_cd, updt_by, updt_dt)
 VALUES
  (99999999999996, 17318624, '2016-12-31', '2017-06-27', '子公司土地使用权', 6797, null, null, null, 1.9899, 0.0000, 6584, 6580,
-  640000, 0.7562, 0, '999999', 'CSCS', 0, clock_timestamp());
+  640000, 0.7562, 0, '999999', 'CSCS', 0, systimestamp);
 commit;
 INSERT INTO public.bond_pledge (bond_pledge_sid, secinner_id, rpt_dt, notice_dt, pledge_nm, pledge_type_id, pledge_desc, pledge_owner_id, pledge_owner, pledge_value, priority_value, pledge_depend_id, pledge_control_id, region, mitigation_value, isdel, srcid, src_cd, updt_by, updt_dt)
 VALUES
  (99999999999995, 17318624, '2016-12-31', '2017-07-21', '公司以其全资子公司欧亚集团沈阳联营有限公司合法拥有的房地产为本期债券提供抵押担保', 6799, null, null,
                   null, 10.2362, 0.0000, 6584, 6580, 220000, 3.1118, 0, '999999', 'CSCS', 0,
-clock_timestamp());
+systimestamp);
 
 
 -- select * from bond_warrantor where isdel = 0 and bond_warrantor_sid = '10000000014206';
@@ -423,7 +423,7 @@ VALUES (99999999999996, 17318624, '2016-12-31', null, null, 8111, null, 206352, 
                                                                                                               null,
                                                                                                               6603,
                                                                                                               null,
- null, null, null, null, null, null, 0, '999999', 'CSCS', 0, clock_timestamp());
+ null, null, null, null, null, null, 0, '999999', 'CSCS', 0, systimestamp);
 
 INSERT INTO public.bond_warrantor (bond_warrantor_sid, secinner_id, rpt_dt, notice_dt, warranty_rate, guarantee_type_id, warranty_period, warrantor_id, warrantor_nm, warrantor_type_id, start_dt, end_dt, warranty_amt, warrantor_resume, warranty_contract, warranty_benef, warranty_content, warranty_type_id, warranty_claim, warranty_strength_id, pay_step, warranty_fee, exempt_set, warranty_obj, isser_credit, src_updt_dt, mitigation_value, isdel, srcid, src_cd, updt_by, updt_dt)
 VALUES (99999999999995, 17318624, '2016-12-31', '2017-12-15', null, 8111, null, 83463, '碧桂园控股有限公司', 6592, null, null,
@@ -436,5 +436,5 @@ VALUES (99999999999995, 17318624, '2016-12-31', '2017-12-15', null, 8111, null, 
                                                                                                                 null,
                                                                                                                 6597,
                                                                                                                 null,
- null, null, null, null, null, null, 0, '999999', 'CSCS', 0, clock_timestamp());
+ null, null, null, null, null, null, 0, '999999', 'CSCS', 0, systimestamp);
 commit;

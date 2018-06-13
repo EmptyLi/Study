@@ -1,3 +1,5 @@
+-- 企业外评
+-- 不要中债的评级结构，只取最新的外评结果
 with temp_compy_creditrating as
 (
     select
@@ -9,8 +11,10 @@ with temp_compy_creditrating as
       over (
         partition by company_id ) as max_rating_dt
     from compy_creditrating
-    where isdel = 0 and company_id <> '270238'
+    where isdel = 0 and credit_org_id <> '270238'
 ),
+-- 债券外评
+-- 不要中债的评级结构，只取最新的外评结果
     temp_bond_creditchg as
   (
       select
@@ -24,6 +28,8 @@ with temp_compy_creditrating as
       from bond_creditchg
       where isdel = 0 and credit_id <> '270238'
   ),
+  -- 债项担保人信息
+  -- 按照债券内码，将所有担保人的名称聚合
     TEMP_bond_warrantor_expert AS
   (
       SELECT
@@ -35,6 +41,8 @@ with temp_compy_creditrating as
       WHERE isdel = 0
       group by secinner_id
   ),
+  -- 债项抵质押品信息
+  -- 按照债券内码，将所有抵质押品的名称聚合
     temp_bond_pledge as
   (
       select
@@ -46,6 +54,8 @@ with temp_compy_creditrating as
       where isdel = 0
       group by secinner_id
   ),
+  -- 企业内评结果
+  -- 按照企业分组，按照factor_dt, updt_dt取最新的评级记录
     temp_RATING_RECORD as (
       select
         COMPANY_ID,
@@ -55,9 +65,11 @@ with temp_compy_creditrating as
         row_number()
         over (
           partition by COMPANY_ID
-          order by FACTOR_DT desc ) as max_Factor_dt
+          order by FACTOR_DT desc,updt_dt desc ) as max_Factor_dt
       from RATING_RECORD
       where CLIENT_ID = 4),
+      -- 债券内评结果
+      -- 按照债券内码分组，按照factor_dt, updt_dt取最新的评级
     temp_BOND_RATING_RECORD as (
       select
         SECINNER_ID,
@@ -67,10 +79,21 @@ with temp_compy_creditrating as
         row_number()
         over (
           partition by SECINNER_ID
-          order by factor_dt desc ) as max_Factor_dt
-      from BOND_RATING_RECORD)
+          order by factor_dt desc,updt_dt desc ) as max_Factor_dt
+      from BOND_RATING_RECORD),
+      -- 债券内码与债券代码+交易市场的映射
+  TEMP_BOND_BASICINFO AS
+(SELECT A.SECINNER_ID, A.SECURITY_CD || C.MARKET_ABBR AS SECURITY_CD
+  FROM (SELECT DISTINCT SECINNER_ID, SECURITY_CD, TRADE_MARKET_ID
+          FROM BOND_BASICINFO
+          WHERE ISDEL = 0) A
+  JOIN LKP_CHARCODE B
+    ON A.TRADE_MARKET_ID = B.CONSTANT_ID
+   AND B.CONSTANT_TYPE = 206
+  JOIN LKP_MARKET_ABBR C
+    ON B.CONSTANT_CD = C.MARKET_CD)
 select
-  a.security_cd   as "债券代码",
+  o.security_cd   as "债券代码",
   a.security_snm  as "债券简称",
   b.company_nm    as "发行人名称",
   d.exposure      as "敞口",
@@ -92,47 +115,64 @@ select
   n.FACTOR_DT     as "债券报告期",
   n.ADJUST_RATING as "债券内评"
 from bond_basicinfo a
+-- 取发行人
   inner join VW_BOND_ISSUER a1
     on a1.ISSUER_ID is not null
        and a1.SECINNER_ID = a.SECINNER_ID
+-- 取发行人名称
   inner join compy_basicinfo b
     on a.isdel = a.isdel
        and b.COMPANY_ID = a1.ISSUER_ID
+-- 取企业敞口sid
   inner join compy_exposure c
     on c.isdel = b.is_del
        and c.company_id = b.company_id
+-- 取敞口对应的名称
   inner join exposure d
     on d.exposure_sid = c.exposure_sid
        and d.isdel = c.isdel
+       -- 取债券的估值收益率
   --   inner join bond_valuations e
   --     on e.isdel = d.isdel
   --        and e.secinner_id = a.secinner_id
   --        and e.trade_dt = date '2018-05-24'
+  -- 取担保人的信息
   left join TEMP_bond_warrantor_expert f
     on f.secinner_id = a.secinner_id
+-- 取抵质押品的信息
   left join temp_bond_pledge g
     on g.secinner_id = a.secinner_id
+    -- 取企业外评的信息
   left join temp_compy_creditrating h
     on h.company_id = a1.ISSUER_ID
        and h.max_rating_dt = h.rating_dt
+-- 取外评机构的名称
   left join compy_basicinfo i
     on i.is_del = 0
-       and i.company_id = h.company_id
+       and i.company_id = h.credit_org_id
+-- 取债券外评的信息
   left join temp_bond_creditchg j
     on j.secinner_id = a.secinner_id
        and j.change_dt = j.max_change_dt
+       -- 取久期和剩余期限
   --   left join bond_danalysis k
   --     on k.isdel = 0
   --        and k.secinner_id = a.secinner_id
+-- 转换发行方式
   inner join LKP_NUMBCODE l
     on l.isdel = 0
        and l.constant_type = 205
        and l.constant_cd = a.issue_type_cd
+-- 取企业内评结构
   left join temp_RATING_RECORD m
     on m.max_Factor_dt = 1
        and m.COMPANY_ID = a1.ISSUER_ID
+-- 取债券内评结果
   left join temp_BOND_RATING_RECORD n
     on n.SECINNER_ID = a.SECINNER_ID
        and n.max_Factor_dt = 1
+-- 取债券代码+交易市场
+  left join TEMP_BOND_BASICINFO o
+   on a.SECINNER_ID = o.SECINNER_ID
 where a.isdel = 0
 --       and a.security_cd = '118359'

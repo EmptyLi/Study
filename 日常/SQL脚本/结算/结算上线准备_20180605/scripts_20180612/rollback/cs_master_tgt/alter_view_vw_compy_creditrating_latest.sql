@@ -1,0 +1,2 @@
+alter view ray_vw_compy_creditrating_latest to vw_compy_creditrating_latest;
+commit;

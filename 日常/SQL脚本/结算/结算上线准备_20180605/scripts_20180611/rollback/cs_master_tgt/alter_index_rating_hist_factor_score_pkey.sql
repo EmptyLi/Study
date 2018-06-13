@@ -1,0 +1,2 @@
+alter index ray_rating_hist_factor_score_pkey rename to rating_hist_factor_score_pk;
+commit;
