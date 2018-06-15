@@ -20,3 +20,4 @@ create table  if not exists bond_rating_factor
   updt_dt                timestamp                                                    not null
 );
 commit;
+select setval('seq_bond_rating_factor', max(bond_rating_factor_sid)) from bond_rating_factor;

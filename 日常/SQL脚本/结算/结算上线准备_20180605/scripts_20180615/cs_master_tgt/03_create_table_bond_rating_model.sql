@@ -16,3 +16,5 @@ CREATE TABLE  if not exists bond_rating_model
   updt_dt    TIMESTAMP                                                   NOT NULL
 );
 commit;
+
+select setval('seq_bond_rating_model', max(model_id)) from bond_rating_model;

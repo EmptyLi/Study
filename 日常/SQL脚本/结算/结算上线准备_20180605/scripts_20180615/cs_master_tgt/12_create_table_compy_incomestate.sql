@@ -1,7 +1,5 @@
-CREATE TABLE
-    compy_incomestate
-    (
-        compy_incomestate_sid BIGINT DEFAULT nextval('seq_compy_incomestate'::regclass) NOT NULL,
+CREATE TABLE if not exists compy_incomestate
+( compy_incomestate_sid BIGINT DEFAULT nextval('seq_compy_incomestate'::regclass) NOT NULL,
         first_notice_dt TIMESTAMP(6) WITHOUT TIME ZONE,
         latest_notice_dt TIMESTAMP(6) WITHOUT TIME ZONE,
         company_id BIGINT NOT NULL,
@@ -111,3 +109,5 @@ CREATE TABLE
         updt_dt TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL,
         CONSTRAINT pk_compy_incomestate PRIMARY KEY (compy_incomestate_sid)
     );
+commit;
+select setval('seq_compy_incomestate', max(compy_incomestate_sid)) from compy_incomestate;

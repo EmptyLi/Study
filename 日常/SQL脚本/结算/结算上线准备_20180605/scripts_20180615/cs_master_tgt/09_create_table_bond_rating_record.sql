@@ -24,3 +24,4 @@ create table if not exists bond_rating_record
 )
 ;
 commit;
+select setval('seq_bond_rating_record', max(bond_rating_record_sid)) from bond_rating_record;

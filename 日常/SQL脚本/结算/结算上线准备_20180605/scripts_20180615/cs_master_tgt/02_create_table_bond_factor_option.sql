@@ -17,3 +17,5 @@ create table if not exists bond_factor_option
   updt_dt                timestamp(6)                                                 not null
 );
 commit;
+
+select setval('seq_bond_factor_option', max(bond_factor_option_sid)) from bond_factor_option;
