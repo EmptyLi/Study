@@ -37,4 +37,4 @@ create table if not exists bond_warrantor
 )
 ;
 commit;
-select setval('seq_bond_warrantor', max(bond_warrantor_sid)) from ray_bond_warrantor;
+-- select setval('seq_bond_warrantor', max(bond_warrantor_sid)) from ray_bond_warrantor;
