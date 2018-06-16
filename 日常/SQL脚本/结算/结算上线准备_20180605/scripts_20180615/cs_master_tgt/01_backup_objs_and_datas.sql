@@ -85,17 +85,17 @@ lower('ray_vw_compy_creditrating_latest'));
 -- and lower(matviewname) in (lower('ray_vw_compy_finanalarm'));
 -- 期望值： 1
 -------------------------------------------------------------
-
-drop table bond_factor_option;
-drop table bond_rating_model;
-drop table lkp_ratingcd_xw;
-drop table user_activity;
-drop table rating_factor;
-drop table bond_rating_factor;
-drop table bond_rating_record;
-drop table bond_pledge;
-drop table bond_warrantor;
-drop table compy_incomestate;
+drop table if exists warning_regulation_0330;
+drop table if exists bond_factor_option;
+drop table if exists bond_rating_model;
+drop table if exists lkp_ratingcd_xw;
+drop table if exists user_activity;
+drop table if exists rating_factor;
+drop table if exists bond_rating_factor;
+drop table if exists bond_rating_record;
+drop table if exists bond_pledge;
+drop table if exists bond_warrantor;
+drop table if exists compy_incomestate;
 
 -- 序列化版本
 delete from oauth_access_token where 1 = 1;
