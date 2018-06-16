@@ -32,3 +32,10 @@ from ray_rating_factor a
     inner join rating_record b
   on a.rating_record_id = b.rating_record_id;
 commit;
+
+
+select setval('seq_rating_hist_factor_score',case when max(rating_factor_id :: bigint) > max(start_value :: bigint)
+  then max(rating_factor_id :: bigint)
+       else max(start_value :: bigint) end)
+from ray_rating_factor
+  inner join information_schema.sequences on sequence_schema = 'public' and sequence_name = 'seq_rating_hist_factor_score';

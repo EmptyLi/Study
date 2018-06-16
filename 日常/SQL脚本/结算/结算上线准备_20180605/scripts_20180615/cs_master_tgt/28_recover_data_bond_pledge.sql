@@ -46,3 +46,9 @@ bond_pledge_sid,
 	updt_dt
 from ray_bond_pledge;
 commit;
+
+select setval('seq_bond_pledge',case when max(bond_pledge_sid :: bigint) > max(start_value :: bigint)
+  then max(bond_pledge_sid :: bigint)
+       else max(start_value :: bigint) end)
+from ray_bond_pledge
+  inner join information_schema.sequences on sequence_schema = 'public' and sequence_name = 'seq_bond_pledge';

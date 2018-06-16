@@ -16,4 +16,4 @@ create table  if not exists rating_factor
   adjustment_comment        varchar(2000)
 );
 commit;
-select setval('seq_rating_hist_factor_score', max(rating_factor_id)) from rating_factor;
+-- select setval('seq_rating_hist_factor_score', max(rating_factor_id)) from ray_rating_factor;

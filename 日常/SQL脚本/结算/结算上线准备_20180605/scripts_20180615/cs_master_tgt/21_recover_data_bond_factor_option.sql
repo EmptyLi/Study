@@ -29,3 +29,9 @@ select bond_factor_option_sid
 ,updt_dt
   from ray_bond_factor_option;
   commit;
+
+  select setval('seq_bond_factor_option',case when max(bond_factor_option_sid :: bigint) > max(start_value :: bigint)
+    then max(bond_factor_option_sid :: bigint)
+         else max(start_value :: bigint) end)
+  from bond_factor_option
+    inner join information_schema.sequences on sequence_schema = 'public' and sequence_name = 'seq_bond_factor_option';

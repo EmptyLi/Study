@@ -18,4 +18,4 @@ create table if not exists bond_factor_option
 );
 commit;
 
-select setval('seq_bond_factor_option', max(bond_factor_option_sid)) from bond_factor_option;
+-- select setval('seq_bond_factor_option', max(bond_factor_option_sid)) from ray_bond_factor_option;

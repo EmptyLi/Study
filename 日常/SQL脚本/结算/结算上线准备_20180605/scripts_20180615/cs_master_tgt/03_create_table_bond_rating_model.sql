@@ -17,4 +17,4 @@ CREATE TABLE  if not exists bond_rating_model
 );
 commit;
 
-select setval('seq_bond_rating_model', max(model_id)) from bond_rating_model;
+-- select setval('seq_bond_rating_model', max(model_id)) from ray_bond_rating_model;

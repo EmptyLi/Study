@@ -42,3 +42,10 @@ bond_rating_record_sid
 ,updt_dt
 from ray_bond_rating_record;
 commit;
+
+
+select setval('seq_bond_rating_record',case when max(bond_rating_record_sid :: bigint) > max(start_value :: bigint)
+  then max(bond_rating_record_sid :: bigint)
+       else max(start_value :: bigint) end)
+from ray_bond_rating_record
+  inner join information_schema.sequences on sequence_schema = 'public' and sequence_name = 'seq_bond_rating_record';

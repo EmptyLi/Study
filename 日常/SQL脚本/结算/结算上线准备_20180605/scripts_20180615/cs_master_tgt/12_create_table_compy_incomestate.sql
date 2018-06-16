@@ -110,4 +110,4 @@ CREATE TABLE if not exists compy_incomestate
         CONSTRAINT pk_compy_incomestate PRIMARY KEY (compy_incomestate_sid)
     );
 commit;
-select setval('seq_compy_incomestate', max(compy_incomestate_sid)) from compy_incomestate;
+-- select setval('seq_compy_incomestate', max(compy_incomestate_sid)) from ray_compy_incomestate;

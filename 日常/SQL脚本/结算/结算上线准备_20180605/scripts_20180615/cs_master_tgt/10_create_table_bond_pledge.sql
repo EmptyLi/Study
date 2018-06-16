@@ -24,4 +24,4 @@ create table if not exists bond_pledge
   updt_dt           timestamp                                             not null
 );
 commit;
-select setval('seq_bond_pledge', max(bond_pledge_sid)) from bond_pledge;
+-- select setval('seq_bond_pledge', max(bond_pledge_sid)) from ray_bond_pledge;
