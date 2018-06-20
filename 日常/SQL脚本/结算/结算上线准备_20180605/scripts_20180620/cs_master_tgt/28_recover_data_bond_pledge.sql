@@ -47,8 +47,13 @@ bond_pledge_sid,
 from ray_bond_pledge;
 commit;
 
-select setval('seq_bond_pledge',case when max(bond_pledge_sid :: bigint) > max(start_value :: bigint)
+select setval('seq_bond_pledge',case when max(bond_pledge_sid :: bigint) > nextval('seq_bond_pledge')
   then max(bond_pledge_sid :: bigint)
-       else max(start_value :: bigint) end)
-from ray_bond_pledge
-  inner join information_schema.sequences on sequence_schema = 'public' and sequence_name = 'seq_bond_pledge';
+       else nextval('seq_bond_pledge') end)
+from ray_bond_pledge;
+
+-- select setval('seq_bond_pledge',case when max(bond_pledge_sid :: bigint) > max(start_value :: bigint)
+--   then max(bond_pledge_sid :: bigint)
+--        else max(start_value :: bigint) end)
+-- from ray_bond_pledge
+--   inner join information_schema.sequences on sequence_schema = 'public' and sequence_name = 'seq_bond_pledge';

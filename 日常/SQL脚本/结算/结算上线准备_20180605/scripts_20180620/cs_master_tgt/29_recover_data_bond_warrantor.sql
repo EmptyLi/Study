@@ -69,9 +69,13 @@ bond_warrantor_sid,
 from ray_bond_warrantor;
 commit;
 
-
-select setval('seq_bond_warrantor',case when max(bond_warrantor_sid :: bigint) > max(start_value :: bigint)
+select setval('seq_bond_warrantor',case when max(bond_warrantor_sid :: bigint) > nextval('seq_bond_warrantor')
   then max(bond_warrantor_sid :: bigint)
-       else max(start_value :: bigint) end)
-from ray_bond_warrantor
-  inner join information_schema.sequences on sequence_schema = 'public' and sequence_name = 'seq_bond_warrantor';
+       else nextval('seq_bond_warrantor') end)
+from ray_bond_warrantor;
+
+-- select setval('seq_bond_warrantor',case when max(bond_warrantor_sid :: bigint) > max(start_value :: bigint)
+--   then max(bond_warrantor_sid :: bigint)
+--        else max(start_value :: bigint) end)
+-- from ray_bond_warrantor
+--   inner join information_schema.sequences on sequence_schema = 'public' and sequence_name = 'seq_bond_warrantor';

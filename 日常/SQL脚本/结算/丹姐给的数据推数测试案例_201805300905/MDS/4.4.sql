@@ -17,6 +17,10 @@ update compy_factor_finance
     set updt_dt = now()
 where company_id = 348606 and rpt_dt = date'2016-12-31';
 
+update compy_factor_finance_expert
+set updt_dt = now()
+where company_id = 348606 and rpt_dt = date'2016-12-31' and client_id = 1;
+
 update compy_factor_operation_expert
 set updt_dt = now()
 where company_id = 348606 and rpt_dt = date'2016-12-31' and client_id = 1;

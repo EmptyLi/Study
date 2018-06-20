@@ -114,8 +114,13 @@ INSERT INTO compy_incomestate (compy_incomestate_sid, first_notice_dt, latest_no
   commit;
 
 
- select setval('seq_compy_incomestate',case when max(compy_incomestate_sid :: bigint) > max(start_value :: bigint)
+  select setval('seq_compy_incomestate',case when max(compy_incomestate_sid :: bigint) > nextval('seq_compy_incomestate')
     then max(compy_incomestate_sid :: bigint)
-         else max(start_value :: bigint) end)
-  from ray_compy_incomestate
-inner join information_schema.sequences on sequence_schema = 'public' and sequence_name = 'seq_compy_incomestate';
+         else nextval('seq_compy_incomestate') end)
+  from ray_compy_incomestate;
+
+--  select setval('seq_compy_incomestate',case when max(compy_incomestate_sid :: bigint) > max(start_value :: bigint)
+--     then max(compy_incomestate_sid :: bigint)
+--          else max(start_value :: bigint) end)
+--   from ray_compy_incomestate
+-- inner join information_schema.sequences on sequence_schema = 'public' and sequence_name = 'seq_compy_incomestate';

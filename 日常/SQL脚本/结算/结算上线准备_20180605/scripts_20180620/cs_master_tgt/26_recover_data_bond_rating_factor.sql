@@ -37,8 +37,13 @@ bond_rating_factor_sid
 from ray_bond_rating_factor;
 commit;
 
-select setval('seq_bond_rating_factor',case when max(bond_rating_factor_sid :: bigint) > max(start_value :: bigint)
+select setval('seq_bond_rating_factor',case when max(bond_rating_factor_sid :: bigint) > nextval('seq_bond_rating_factor')
   then max(bond_rating_factor_sid :: bigint)
-       else max(start_value :: bigint) end)
-from ray_bond_rating_factor
-  inner join information_schema.sequences on sequence_schema = 'public' and sequence_name = 'seq_bond_rating_factor';
+       else nextval('seq_bond_rating_factor') end)
+from ray_bond_rating_factor;
+
+-- select setval('seq_bond_rating_factor',case when max(bond_rating_factor_sid :: bigint) > max(start_value :: bigint)
+--   then max(bond_rating_factor_sid :: bigint)
+--        else max(start_value :: bigint) end)
+-- from ray_bond_rating_factor
+--   inner join information_schema.sequences on sequence_schema = 'public' and sequence_name = 'seq_bond_rating_factor';
