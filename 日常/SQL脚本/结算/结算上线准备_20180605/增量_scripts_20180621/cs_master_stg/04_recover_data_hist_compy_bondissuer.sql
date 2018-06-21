@@ -1,8 +1,8 @@
-delete from compy_bondissuer where 1 = 1;
-commit;
+delete from hist_compy_bondissuer where 1 = 1;
 
-insert into compy_bondissuer
-   (company_id
+insert into hist_compy_bondissuer
+   (record_sid
+,company_id
 ,region
 ,org_nature_id
 ,actctrl_sharehd_ratio
@@ -12,8 +12,10 @@ insert into compy_bondissuer
 ,srcid
 ,src_cd
 ,updt_by
-,updt_dt)
-    select company_id
+,updt_dt
+,loadlog_sid)
+    select record_sid
+,company_id
 ,region
 ,org_nature_id
 ,actctrl_sharehd_ratio
@@ -24,5 +26,6 @@ insert into compy_bondissuer
 ,src_cd
 ,0 as updt_by
 ,updt_dt
-from ray_compy_bondissuer;
+,loadlog_sid
+from ray_hist_compy_bondissuer;
 commit;
