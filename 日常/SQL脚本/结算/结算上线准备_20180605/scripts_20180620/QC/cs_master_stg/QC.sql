@@ -32,6 +32,10 @@ select rpt_dt from stg_bond_pledge limit 1;
 select rpt_dt from hist_bond_warrantor limit 1;
 -- 无报错信息，表明字段增加成功
 select rpt_dt from hist_bond_pledge limit 1;
+-- 无报错信息，表明字段增加成功
+select updt_by from hist_compy_bondissuer limit 1;
+-- 无报错信息，表明字段增加成功
+select updt_by from stg_compy_bondissuer limit 1;
 
 
 

@@ -39,13 +39,13 @@
 -- commit;
 --
 -- --
--- create table ray_subscribe_table as
--- select * from subscribe_table;
--- commit;
---
--- create table ray_lkp_subscribe_table as
--- select * from lkp_subscribe_table;
--- commit;
+create table ray_subscribe_table as
+select * from subscribe_table;
+commit;
+
+create table ray_lkp_subscribe_table as
+select * from lkp_subscribe_table;
+commit;
 
 -- add by raylee 20180620
 create table ray_stg_compy_bondissuer as select * from stg_compy_bondissuer;

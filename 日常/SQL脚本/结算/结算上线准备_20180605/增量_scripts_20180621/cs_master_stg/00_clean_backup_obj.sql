@@ -14,10 +14,10 @@
 -- commit;
 -- drop function if exists ray_fn_compy_finance_check();
 -- commit;
--- drop table if exists ray_lkp_subscribe_table;
--- commit;
--- drop table if exists ray_subscribe_table;
--- commit;
+drop table if exists ray_lkp_subscribe_table;
+commit;
+drop table if exists ray_subscribe_table;
+commit;
 
 --
 drop table if exists ray_stg_compy_bondissuer;

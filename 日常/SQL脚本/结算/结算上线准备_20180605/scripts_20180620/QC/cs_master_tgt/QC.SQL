@@ -26,6 +26,7 @@ select is_active from bond_rating_model limit 1;
 select orig_record_sid,factor_val_revised,option_num_revised,ratio_revised,adjustment_comment from bond_rating_factor limit 1;
 select rpt_dt from bond_pledge limit 1;
 select rulerating_flag,warning_flag from lkp_model_bond_type limit 1;
+select updt_by from compy_bondissuer limit 1;
 
 ------------------------------------------------------------------------------------------------------------------
 -- 检查视图
