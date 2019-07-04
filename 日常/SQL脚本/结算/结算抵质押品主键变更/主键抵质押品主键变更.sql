@@ -1,0 +1,1 @@
+-- 1、master本地的vw_bond_rating_cacul_pledge需要检查逻辑

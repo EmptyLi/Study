@@ -636,4 +636,51 @@ In [138]: ts.resample('5Min').sum()
 Out[138]:
 2012-01-01    26205
 Freq: 5T, dtype: int32
+
+In [139]: rng = pd.date_range('3/6/2012 00:00', periods=5, freq='D')
+
+In [141]: ts = pd.Series(np.random.randn(len(rng)), rng)
+
+In [143]: ts_utc = ts.tz_localize('UTC')
+
+In [145]: ts_utc.tz_convert('US/Eastern')
+
+In [146]: rng = pd.date_range('1/1/2012', periods=5, freq='M')
+
+In [147]: ps = ts.to_period()
+Out[148]:
+2012-03-06   -0.898127
+2012-03-07    1.149241
+2012-03-08    1.423320
+2012-03-09   -0.356556
+2012-03-10    0.109979
+Freq: D, dtype: float64
+
+```
+
+
+
+
+
+
+
+
+
+
+### 21.1 Object Creation
+> 创建分类数据的几种方法
+- 方法一 定义 dtype="category"
+```python
+s = pd.Series(["a", "b", "c"], dtype="category")
+```
+
+- 方法二 直接使用astype转换
+```python
+In [4]: s = pd.DataFrame({'A':["a","b","c"]})
+In [6]: s["B"] = s["A"].astype("category")
+```
+
+- 方法三 分配一个Category 对象给一个Series 或 DataFrame
+```python
+ 
 ```
